@@ -9,6 +9,10 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      AMOY_RPC_URL: ${{ secrets.AMOY_RPC_URL }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,12 +22,21 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm install
 
       - name: Compile and deploy smart contract
         run: |
           npx hardhat run scripts/deploy.js --network amoy
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Inject React environment variables
+        run: |
+          echo "REACT_APP_AMOY_RPC=${{ secrets.AMOY_RPC_URL }}" > .env
+        working-directory: ./frontend
 
       - name: Build frontend
         working-directory: ./frontend
