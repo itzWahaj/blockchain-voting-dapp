@@ -1,17 +1,48 @@
-node_modules
+# Node modules (backend & frontend)
+node_modules/
+**/node_modules/
+
+# Environment files
 .env
+.env.*  # Covers .env.local, .env.production, etc.
 
-# Hardhat files
-/cache
-/artifacts
+# OS/System files
+.DS_Store
+Thumbs.db
 
-# TypeChain files
-/typechain
-/typechain-types
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# solidity-coverage files
-/coverage
-/coverage.json
+# Hardhat build outputs
+artifacts/
+cache/
+coverage/
+coverage.json
 
-# Hardhat Ignition default folder for deployments against a local node
+# Solidity build tools
+typechain/
+typechain-types/
+
+# Hardhat Ignition deployments
+ignition/deployments/
 ignition/deployments/chain-31337
+
+# GitHub Pages build
+frontend/build/
+
+# Frontend build files
+/build/
+
+# IDE/editor configs
+.vscode/
+.idea/
+
+# Test output
+test-output/
+
+# MacOS temp files
+*.swp
+*.swo
