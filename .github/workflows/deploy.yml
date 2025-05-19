@@ -9,6 +9,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     env:
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       AMOY_RPC: ${{ secrets.AMOY_RPC }}
