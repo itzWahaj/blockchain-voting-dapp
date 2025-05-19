@@ -11,7 +11,7 @@ jobs:
 
     env:
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-      AMOY_RPC_URL: ${{ secrets.AMOY_RPC_URL }}
+      AMOY_RPC: ${{ secrets.AMOY_RPC }}
 
     steps:
       - name: Checkout repository
@@ -35,7 +35,7 @@ jobs:
 
       - name: Inject React environment variables
         run: |
-          echo "REACT_APP_AMOY_RPC=${{ secrets.AMOY_RPC_URL }}" > .env
+          echo "REACT_APP_AMOY_RPC=${{ secrets.AMOY_RPC }}" > .env
         working-directory: ./frontend
 
       - name: Build frontend
