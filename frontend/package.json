@@ -1,5 +1,6 @@
 {
   "name": "frontend",
+  "homepage": "https://itzWahaj.github.io/blockchain-voting-dapp",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,6 +10,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "ethers": "^6.13.7",
+    "gh-pages": "^6.3.0",
     "react": "^19.1.0",
     "react-datepicker": "^8.3.0",
     "react-dom": "^19.1.0",
@@ -20,7 +22,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
