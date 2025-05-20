@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script>
+      // Grab the path the user tried to visit...
+      const path = window.location.pathname;
+      // ...then bounce back to index.html, tucking the original path into a query param
+      const redirectUrl = `${window.location.origin}/?redirect=${encodeURIComponent(path)}`;
+      window.location.replace(redirectUrl);
+    </script>
+    <noscript>
+      <!-- Fallback if JS is off -->
+      <meta http-equiv="refresh" content="0;url=/" />
+    </noscript>
+  </head>
+  <body></body>
+</html>
