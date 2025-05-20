@@ -4,6 +4,17 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// ─── 1) Handle GitHub‑Pages 404 redirect ──────────────────────────────────────
+// When GH‑Pages can’t find a route it serves public/404.html, which
+// immediately redirects to /?redirect=/original/path
+const params = new URLSearchParams(window.location.search);
+const redirectedPath = params.get('redirect');
+if (redirectedPath) {
+  // Replace URL to the original path so your BrowserRouter can match it
+  window.history.replaceState(null, '', redirectedPath);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -11,7 +22,4 @@ root.render(
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
