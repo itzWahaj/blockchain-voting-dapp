@@ -27,7 +27,7 @@ function App() {
   }, [darkMode]);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/blockchain-voting-dapp">
       {/* ⛳️ Enhanced Navigation Bar */}
       <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 py-4 px-6 flex flex-col md:flex-row items-center justify-between fixed w-full top-0 z-50 transition-all duration-500">
         {/* 🌟 Centered Navigation Links */}

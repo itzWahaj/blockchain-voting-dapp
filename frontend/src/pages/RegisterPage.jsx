@@ -34,8 +34,15 @@ export default function RegisterPage() {
         name: address,
         displayName: address,
       },
-      pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-      authenticatorSelection: { authenticatorAttachment: "platform" },
+      pubKeyCredParams: [
+        { type: "public-key", alg: -7 },    // ES256 (MUST HAVE)
+        { type: "public-key", alg: -257 }   // RS256 (optional but adds support)
+      ],
+
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",
+        userVerification: "preferred"
+      },
       timeout: 60000,
       attestation: "none",
     };
@@ -159,11 +166,10 @@ export default function RegisterPage() {
               <button
                 onClick={handleRegister}
                 disabled={loading}
-                className={`w-full py-2 rounded font-semibold flex items-center justify-center gap-2 transition ${
-                  loading
-                    ? "bg-indigo-500/50 cursor-wait text-white"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                }`}
+                className={`w-full py-2 rounded font-semibold flex items-center justify-center gap-2 transition ${loading
+                  ? "bg-indigo-500/50 cursor-wait text-white"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
               >
                 <IdentificationIcon className="h-5 w-5" />
                 {loading ? "Registering on-chain..." : "Register with Fingerprint"}
@@ -271,14 +277,14 @@ export default function RegisterPage() {
               {voterInfo && (
                 <SlideUp>
                   <div className="mt-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm text-gray-800 dark:text-gray-200 space-y-2">
-                <p>📌 <strong>Registered:</strong> {voterInfo.isRegistered ? "Yes ✅" : "No ❌"}</p>
-                <p>🗳️ <strong>Has Voted:</strong> {voterInfo.hasVoted ? "Yes ✅" : "No ❌"}</p>
-                {voterInfo.hasVoted && (
-                  <>
-                    <p>🆔 <strong>Candidate ID:</strong> {voterInfo.votedCandidateId}</p>
-                    <p>🔠 <strong>Candidate Name:</strong> {candidateName}</p>
-                  </>
-                )}
+                    <p>📌 <strong>Registered:</strong> {voterInfo.isRegistered ? "Yes ✅" : "No ❌"}</p>
+                    <p>🗳️ <strong>Has Voted:</strong> {voterInfo.hasVoted ? "Yes ✅" : "No ❌"}</p>
+                    {voterInfo.hasVoted && (
+                      <>
+                        <p>🆔 <strong>Candidate ID:</strong> {voterInfo.votedCandidateId}</p>
+                        <p>🔠 <strong>Candidate Name:</strong> {candidateName}</p>
+                      </>
+                    )}
                   </div>
                 </SlideUp>
               )}
