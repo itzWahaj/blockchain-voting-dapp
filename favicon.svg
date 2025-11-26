@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="circle">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+  <!-- Golden background circle -->
+  <circle cx="50" cy="50" r="50" fill="#FFD700"/>
+  <!-- This will need to be replaced with your actual icon content -->
+  <!-- For now, showing a simple circular design -->
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#C73A31" stroke-width="4"/>
+  <path d="M 30 50 L 45 65 L 70 35" stroke="#C73A31" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
