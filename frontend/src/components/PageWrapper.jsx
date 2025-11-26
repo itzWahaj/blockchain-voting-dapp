@@ -1,5 +1,6 @@
 // src/components/PageWrapper.jsx
 import { useSpring, animated } from '@react-spring/web';
+import { GrainOverlay, Vignette, ScrollProgress } from './GlobalEffects';
 
 export default function PageWrapper({ children }) {
   const props = useSpring({
@@ -8,5 +9,14 @@ export default function PageWrapper({ children }) {
     config: { tension: 180, friction: 22 },
   });
 
-  return <animated.div style={props}>{children}</animated.div>;
+  return (
+    <>
+      <GrainOverlay />
+      <Vignette />
+      <ScrollProgress />
+      <animated.div style={props} className="relative z-10">
+        {children}
+      </animated.div>
+    </>
+  );
 }

@@ -1,0 +1,91 @@
+{
+  "address": "0x7c66720B0Cd69dF034201E4667B2C03fA36e90f7",
+  "abi": [
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "ElectionCreated",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "electionAddress",
+          "indexed": true
+        },
+        {
+          "type": "address",
+          "name": "admin",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "createElection",
+      "constant": false,
+      "payable": false,
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "elections",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ],
+      "outputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "getElections",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "address[]",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "getElectionsCount",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "latestElection",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ]
+    }
+  ]
+}

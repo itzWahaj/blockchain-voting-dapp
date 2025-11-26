@@ -1,12 +1,10 @@
 // utils/blockchain.js
 import { ethers } from "ethers";
-import deployed from "../abi/deployed.json";
+import factoryArtifact from "../abi/factory.json";
+import votingArtifact from "../abi/voting_abi.json";
 
 // ✅ Pull from React-safe .env key
-const AMOY_RPC = process.env.REACT_APP_AMOY_RPC || "rpc-amoy.polygon.technology";
-
-const CONTRACT_ADDRESS = deployed.address;
-const CONTRACT_ABI = deployed.abi;
+const AMOY_RPC = process.env.REACT_APP_AMOY_RPC || "https://rpc-amoy.polygon.technology";
 
 const AMOY_PARAMS = {
   chainId: "0x13882", // hex for 80002
@@ -39,6 +37,35 @@ async function ensureAmoyNetwork() {
   }
 }
 
+// ✅ Get Factory Contract
+const getFactoryContract = async (signerOrProvider) => {
+  return new ethers.Contract(factoryArtifact.address, factoryArtifact.abi, signerOrProvider);
+};
+
+// ✅ Get Latest Election Address
+export const getLatestElectionAddress = async (provider) => {
+  const factory = await getFactoryContract(provider);
+  return await factory.latestElection();
+};
+
+// ✅ Create New Election (Admin Only)
+export const createNewElection = async () => {
+  if (!window.ethereum) throw new Error("MetaMask not found");
+  await ensureAmoyNetwork();
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const factory = await getFactoryContract(signer);
+
+  console.log("Creating new election...");
+  const tx = await factory.createElection();
+  console.log("Transaction sent:", tx.hash);
+  await tx.wait();
+  console.log("New election created!");
+
+  return await factory.latestElection();
+};
+
 // ✅ Get writable contract (with signer)
 export async function getContract() {
   if (!window.ethereum) {
@@ -51,24 +78,35 @@ export async function getContract() {
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
 
-  return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+  const address = await getLatestElectionAddress(provider);
+  return new ethers.Contract(address, votingArtifact.abi, signer);
 }
 
-// ✅ Read-only provider
-export function getReadProvider() {
-  return new ethers.JsonRpcProvider(AMOY_RPC);
+// ✅ Read-only provider (uses MetaMask to avoid CORS)
+export async function getReadProvider() {
+  if (!window.ethereum) {
+    throw new Error("MetaMask not found. Please install it.");
+  }
+  return new ethers.BrowserProvider(window.ethereum);
 }
 
-// ✅ Read-only contract (no signer)
-export function getReadContract() {
-  const provider = getReadProvider();
-  return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+// ✅ Read-only contract (uses MetaMask provider to avoid CORS)
+export async function getReadContract() {
+  const provider = await getReadProvider();
+  const address = await getLatestElectionAddress(provider);
+  return new ethers.Contract(address, votingArtifact.abi, provider);
 }
 
-// ✅ Real-time dashboard events
-export function subscribeToVotingEvents(callbacks) {
-  const provider = getReadProvider();
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+// ✅ Real-time dashboard events (uses MetaMask provider)
+export async function subscribeToVotingEvents(callbacks) {
+  if (!window.ethereum) {
+    console.warn("MetaMask not found, cannot subscribe to events");
+    return;
+  }
+
+  const provider = await getReadProvider();
+  const address = await getLatestElectionAddress(provider);
+  const contract = new ethers.Contract(address, votingArtifact.abi, provider);
 
   // Remove existing listeners first
   contract.removeAllListeners();
@@ -78,7 +116,7 @@ export function subscribeToVotingEvents(callbacks) {
       callbacks.onVoteCast({ voter, candidateId: Number(candidateId) });
     });
   }
-    if (callbacks.onVoterRegistered) {
+  if (callbacks.onVoterRegistered) {
     contract.on("VoterRegistered", (voter, credentialId) => {
       callbacks.onVoterRegistered({ voter, credentialId });
     });
@@ -106,8 +144,10 @@ export function subscribeToVotingEvents(callbacks) {
 
 
 // ✅ Remove all listeners
-export function unsubscribeFromVotingEvents() {
-  const contract = getReadContract();
+export async function unsubscribeFromVotingEvents() {
+  if (!window.ethereum) return;
+
+  const contract = await getReadContract();
   contract.removeAllListeners();
   console.log("🛑 Unsubscribed from Voting events.");
 }

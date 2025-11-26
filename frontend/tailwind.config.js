@@ -3,6 +3,19 @@ module.exports = {
   content: ["./src/**/*.{js,jsx}"],
   theme: {
     extend: {
+      colors: {
+        background: "var(--color-background)",
+        surface: "var(--color-surface)",
+        text: "var(--color-text)",
+        accent: "var(--color-accent)",
+        secondary: "var(--color-secondary)",
+        code: "var(--color-code)",
+      },
+      fontFamily: {
+        headline: ["Cinzel", "serif"],
+        body: ["Inter", "sans-serif"],
+        mono: ["Source Code Pro", "monospace"],
+      },
       transitionProperty: {
         'height': 'height',
         'transform': 'transform'

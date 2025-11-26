@@ -15,6 +15,10 @@ function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
+  const [reduceMotion, setReduceMotion] = useState(() => {
+    return localStorage.getItem("reduceMotion") === "true";
+  });
+
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) {
@@ -24,41 +28,50 @@ function App() {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
-  }, [darkMode]);
+
+    if (reduceMotion) {
+      root.classList.add("motion-reduce");
+      localStorage.setItem("reduceMotion", "true");
+    } else {
+      root.classList.remove("motion-reduce");
+      localStorage.setItem("reduceMotion", "false");
+    }
+  }, [darkMode, reduceMotion]);
 
   return (
     <BrowserRouter basename="/blockchain-voting-dapp">
       {/* ⛳️ Enhanced Navigation Bar */}
-      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 py-4 px-6 flex flex-col md:flex-row items-center justify-between fixed w-full top-0 z-50 transition-all duration-500">
+      <nav className="bg-surface/90 dark:bg-black/90 backdrop-blur-md border-b border-white/5 dark:border-white/5 border-black/5 py-4 px-6 flex flex-col md:flex-row items-center justify-between fixed w-full top-0 z-50 transition-all duration-500">
         {/* 🌟 Centered Navigation Links */}
         <div className="flex-1 flex justify-center order-2 md:order-1 mt-4 md:mt-0">
-          <div className="flex space-x-2 md:space-x-6 font-medium">
+          <div className="flex space-x-2 md:space-x-8 font-headline tracking-widest">
             {["register", "vote", "results", "admin"].map((path) => (
               <NavLink
                 to={`/${path}`}
                 end
+                key={path}
               >
                 {({ isActive }) => (
-                  <>
+                  <div className="relative group">
                     <span
                       className={`
-          px-3 py-2 text-sm md:text-base transition-all duration-300
+          px-3 py-2 text-sm md:text-base transition-all duration-300 uppercase
           ${isActive
-                          ? "text-blue-600 dark:text-blue-400 font-semibold"
-                          : "text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-300"
+                          ? "text-accent font-bold drop-shadow-[0_0_8px_rgba(199,58,49,0.5)]"
+                          : "text-text/60 hover:text-text dark:text-gray-400 dark:hover:text-white"
                         }
         `}
                     >
-                      {path.charAt(0).toUpperCase() + path.slice(1)}
+                      {path}
                     </span>
                     <span
                       className={`
-          absolute left-0 -bottom-1 h-0.5 bg-blue-500 dark:bg-blue-400
+          absolute left-0 -bottom-1 h-0.5 bg-accent
           transition-all duration-300
-          ${isActive ? "w-full" : "w-0"}
+          ${isActive ? "w-full shadow-[0_0_10px_rgba(199,58,49,0.8)]" : "w-0 group-hover:w-1/2"}
         `}
                     />
-                  </>
+                  </div>
                 )}
               </NavLink>
 
@@ -71,20 +84,36 @@ function App() {
           <WalletConnector />
 
           <button
+            onClick={() => setReduceMotion(!reduceMotion)}
+            className="
+              bg-white/5 dark:bg-white/5 bg-black/5 p-2 rounded-lg
+              border border-white/10 dark:border-white/10 border-black/10
+              hover:bg-black/10 dark:hover:bg-white/10 hover:border-accent/50
+              transition-all duration-300
+              shadow-sm group
+            "
+            title="Toggle Motion"
+          >
+            <span className={`text-xs font-bold ${reduceMotion ? "text-accent" : "text-text/60 group-hover:text-text"}`}>
+              {reduceMotion ? "M-OFF" : "M-ON"}
+            </span>
+          </button>
+
+          <button
             onClick={() => setDarkMode(!darkMode)}
             className="
-              bg-white dark:bg-gray-800 p-2 rounded-lg
-              border border-gray-200 dark:border-gray-700
-              hover:scale-105 hover:shadow-sm
+              bg-white/5 dark:bg-white/5 bg-black/5 p-2 rounded-lg
+              border border-white/10 dark:border-white/10 border-black/10
+              hover:bg-black/10 dark:hover:bg-white/10 hover:border-accent/50
               transition-all duration-300
-              shadow-sm
+              shadow-sm group
             "
             title="Toggle Theme"
           >
             {darkMode ? (
-              <SunIcon className="h-5 w-5 text-yellow-400 hover:text-yellow-500" />
+              <SunIcon className="h-5 w-5 text-secondary group-hover:rotate-180 transition-transform duration-500" />
             ) : (
-              <MoonIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 dark:text-gray-300" />
+              <MoonIcon className="h-5 w-5 text-text/60 group-hover:text-text" />
             )}
           </button>
         </div>

@@ -35,8 +35,8 @@ contract Voting {
     event VotingStarted(uint deadline);
     event VotingEnded();
 
-    constructor() {
-        admin = msg.sender;
+    constructor(address _admin) {
+        admin = _admin;
     }
 
     modifier onlyAdmin() {

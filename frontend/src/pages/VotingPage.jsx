@@ -1,10 +1,11 @@
 // src/pages/VotingPage.jsx
 import React, { useEffect, useState } from "react";
-import { getContract, subscribeToVotingEvents, unsubscribeFromVotingEvents } from "../utils/blockchain";
+import { getContract, getReadContract, subscribeToVotingEvents, unsubscribeFromVotingEvents } from "../utils/blockchain";
 import { ethers } from "ethers";
 import { FingerPrintIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import PageWrapper from "../components/PageWrapper";
 import { TiltCard, FadeIn, HoverScale, SlideUp } from "../components/Animations";
+import anime from "animejs";
 
 const candidateImages = JSON.parse(localStorage.getItem("candidateImages") || "{}");
 
@@ -22,6 +23,7 @@ export default function VotingPage() {
   const [scanning, setScanning] = useState(false);
   const [voteCounts, setVoteCounts] = useState({});
   const [credentialIdHash, setCredentialIdHash] = useState("");
+  const [auditEvents, setAuditEvents] = useState([]);
 
   const loadContractData = async () => {
     try {
@@ -66,12 +68,38 @@ export default function VotingPage() {
     }
   };
 
+  const fetchAuditEvents = async () => {
+    try {
+      const contract = await getReadContract();
+      // Get current block to calculate range
+      const currentBlock = await contract.runner.provider.getBlockNumber();
+      const fromBlock = Math.max(0, currentBlock - 5000); // Fetch last 5000 blocks (~3-4 hours)
+
+      const filter = contract.filters.VoteCast();
+      const events = await contract.queryFilter(filter, fromBlock, "latest");
+
+      const formattedEvents = events.reverse().slice(0, 10).map(e => ({
+        name: "VoteCast",
+        blockNumber: e.blockNumber,
+        hash: e.transactionHash,
+        voter: e.args[0]
+      }));
+      setAuditEvents(formattedEvents);
+    } catch (err) {
+      console.error("Error fetching audit events:", err);
+    }
+  };
+
   useEffect(() => {
     // Initial load
     loadContractData();
+    fetchAuditEvents();
 
     // Setup event listeners
-    const handleVoteCast = () => loadContractData();
+    const handleVoteCast = () => {
+      loadContractData();
+      fetchAuditEvents();
+    };
     const handleVotingStarted = () => loadContractData();
     const handleVotingEnded = () => loadContractData();
 
@@ -103,6 +131,17 @@ export default function VotingPage() {
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [deadline, votingEnded]);
+
+  useEffect(() => {
+    anime({
+      targets: ".vote-card",
+      translateY: [30, 0],
+      opacity: [0, 1],
+      easing: "easeOutExpo",
+      duration: 1000,
+      delay: anime.stagger(100)
+    });
+  }, [candidates]);
 
   const simulateBiometricScan = async () => {
     setScanning(true);
@@ -147,6 +186,7 @@ export default function VotingPage() {
 
       if (receipt.status === 1) {
         await loadContractData(); // Refresh all data after successful vote
+        fetchAuditEvents(); // Refresh audit trail
         const voted = candidates.find(c => c.id === selectedId);
         setVotedCandidateName(voted?.name || "Unknown");
         setStatus("✅ Vote cast successfully.");
@@ -159,59 +199,149 @@ export default function VotingPage() {
     }
   };
 
-
-   return (
+  return (
     <PageWrapper>
-      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500 flex items-center justify-center px-4 py-10">
-        <TiltCard className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xl transition-all duration-300">
+      <div className="min-h-screen bg-background font-body text-gray-300 flex flex-col items-center justify-center px-4 py-10">
+        <TiltCard className="w-full max-w-2xl">
+          <div className="bg-surface border border-white/5 p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+            {/* Background Texture */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none" />
+
             <FadeIn delay={200}>
-              <h2 className="text-3xl font-bold text-center text-indigo-700 dark:text-indigo-400 mb-4">
-                🗳️ Cast Your Vote
-              </h2>
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-headline font-bold text-text dark:text-white mb-2 tracking-wider">
+                  One vote. One chance.
+                </h2>
+                <p className="text-secondary font-mono uppercase tracking-widest text-sm">
+                  Make it count.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={300}>
+              <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-4 mb-8 text-sm text-text/80 dark:text-gray-300 space-y-2">
+                <p>• You can vote <strong className="text-text dark:text-white">once</strong>.</p>
+                <p>• Your vote is <strong className="text-text dark:text-white">encrypted</strong> before being sent.</p>
+                <p>• The smart contract records your vote <strong className="text-text dark:text-white">immutably</strong>.</p>
+                <p>• No admin can change or override your choice.</p>
+              </div>
+            </FadeIn>
+
+            {/* Pre-vote Security Checks */}
+            <FadeIn delay={400}>
+              <div className="grid grid-cols-2 gap-4 mb-8 text-xs font-mono border-b border-white/5 pb-6">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">REGISTERED</span>
+                  <span className={hasVoted || !status.includes("Start") ? "text-green-400" : "text-gray-400"}>
+                    {hasVoted ? "✔" : "Checking..."}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">BIOMETRIC</span>
+                  <span className={biometricVerified || hasVoted ? "text-green-400" : "text-gray-400"}>
+                    {biometricVerified || hasVoted ? "✔ VERIFIED" : "PENDING"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">WINDOW</span>
+                  <span className={votingStarted && !votingEnded ? "text-green-400" : "text-red-400"}>
+                    {votingStarted && !votingEnded ? "OPEN" : "CLOSED"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">STATUS</span>
+                  <span className={hasVoted ? "text-green-400" : "text-accent"}>
+                    {hasVoted ? "CAST" : "NOT CAST"}
+                  </span>
+                </div>
+              </div>
             </FadeIn>
 
             {timeLeft && (
               <FadeIn>
-                <p className="text-center text-sm mb-4 text-blue-500 animate-pulse">{timeLeft}</p>
+                <p className="text-center font-mono text-sm mb-8 text-secondary animate-pulse tracking-widest uppercase">
+                  {timeLeft}
+                </p>
               </FadeIn>
             )}
 
             {!votingStarted || votingEnded ? (
               <SlideUp>
-                <p className="text-red-600 dark:text-red-400 text-center font-medium">⚠️ Voting is closed.</p>
+                <div className="p-6 bg-red-900/20 border border-red-500/30 rounded-lg text-center">
+                  <p className="text-red-400 font-headline text-xl">⚠️ Voting Session Closed</p>
+                </div>
               </SlideUp>
             ) : hasVoted ? (
               <SlideUp>
-                <div className="text-green-700 dark:text-green-400 text-center text-lg font-medium">
-                  ✅ You voted for <strong>{votedCandidateName}</strong>.
+                <div className="p-8 bg-green-900/20 border border-green-500/30 rounded-lg text-center space-y-4 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-green-500/5 animate-pulse" />
+                  <div className="text-5xl relative z-10">✅</div>
+                  <div className="text-green-400 font-headline text-2xl relative z-10">
+                    Vote Sealed & Recorded
+                  </div>
+                  <p className="text-gray-400 relative z-10">
+                    You cast your vote for <span className="text-text dark:text-white font-bold">{votedCandidateName}</span>
+                  </p>
+
+                  <div className="mt-6 pt-6 border-t border-green-500/20 text-xs font-mono text-left space-y-2 relative z-10">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">STATUS</span>
+                      <span className="text-green-400">CONFIRMED ON-CHAIN</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">VERIFICATION</span>
+                      <span className="text-code">See Audit Trail Below</span>
+                    </div>
+                  </div>
                 </div>
               </SlideUp>
             ) : (
               <>
-                <div className="space-y-4 mb-6">
-                  {candidates.map((c) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  {candidates.map((c, i) => (
                     <SlideUp key={c.id}>
                       <HoverScale>
                         <div
                           onClick={() => setSelectedId(c.id)}
-                          className={`flex items-center gap-4 p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                            selectedId === c.id
-                              ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-800/20"
-                              : "border-gray-300 dark:border-gray-700"
-                          }`}
+                          className={`vote-card relative flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-300 overflow-hidden group ${selectedId === c.id
+                            ? "border-accent bg-accent/10 shadow-[0_0_30px_rgba(199,58,49,0.3)]"
+                            : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20"
+                            }`}
                         >
-                          <img
-                            src={candidateImages[c.id] || "https://via.placeholder.com/50"}
-                            alt={c.name}
-                            className="w-12 h-12 rounded-full border object-cover"
-                          />
-                          <div className="flex flex-col">
-                            <span className="font-medium text-gray-800 dark:text-white">{c.name}</span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              🗳️ Votes: {voteCounts[c.id] || 0}
-                            </span>
+                          {selectedId === c.id && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-transparent opacity-50" />
+                          )}
+
+                          <div className="relative w-16 h-16 rounded-full border-2 border-white/10 overflow-hidden shrink-0 group-hover:scale-110 transition-transform duration-500">
+                            <img
+                              src={candidateImages[c.id] || "https://via.placeholder.com/150"}
+                              alt={c.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
+
+                          <div className="flex flex-col relative z-10 w-full">
+                            <span className={`font-headline font-bold text-lg ${selectedId === c.id ? "text-text dark:text-white" : "text-text/70 dark:text-gray-300"}`}>
+                              {c.name}
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1 italic">
+                              "{c.id % 2 === 0 ? "To scale the network for global adoption." : "To implement decentralized governance for all."}"
+                            </p>
+                            <div className="mt-3 pt-3 border-t border-white/5">
+                              <p className="text-[10px] font-mono uppercase tracking-wider text-secondary">
+                                Why this matters
+                              </p>
+                              <p className="text-xs text-text/60 dark:text-gray-400 mt-1">
+                                {c.id % 2 === 0 ? "Focusing on speed, efficiency, and lower costs." : "A vote for transparency and community-led decisions."}
+                              </p>
+                            </div>
+                          </div>
+
+                          {selectedId === c.id && (
+                            <div className="absolute right-4 text-accent">
+                              <CheckCircleIcon className="h-6 w-6" />
+                            </div>
+                          )}
                         </div>
                       </HoverScale>
                     </SlideUp>
@@ -220,19 +350,18 @@ export default function VotingPage() {
 
                 {!biometricVerified && (
                   <FadeIn>
-                    <div className="mb-4 text-center">
+                    <div className="mb-6 text-center">
                       <HoverScale>
                         <button
                           onClick={simulateBiometricScan}
                           disabled={scanning}
-                          className={`w-full py-3 flex justify-center items-center gap-2 rounded-lg text-white font-semibold transition ${
-                            scanning
-                              ? "bg-indigo-400 animate-pulse"
-                              : "bg-indigo-600 hover:bg-indigo-700"
-                          }`}
+                          className={`w-full py-4 flex justify-center items-center gap-3 rounded-lg font-bold tracking-widest transition-all ${scanning
+                            ? "bg-secondary/20 text-secondary animate-pulse border border-secondary/50"
+                            : "bg-secondary hover:bg-yellow-500 text-black shadow-lg hover:shadow-yellow-500/20"
+                            }`}
                         >
-                          <FingerPrintIcon className="h-5 w-5" />
-                          {scanning ? "Scanning..." : "Authenticate with Fingerprint"}
+                          <FingerPrintIcon className="h-6 w-6" />
+                          {scanning ? "SCANNING BIOMETRICS..." : "AUTHENTICATE IDENTITY"}
                         </button>
                       </HoverScale>
                     </div>
@@ -241,10 +370,10 @@ export default function VotingPage() {
 
                 {biometricVerified && (
                   <FadeIn>
-                    <div className="flex justify-center mb-4">
-                      <div className="flex items-center gap-2 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 px-4 py-2 rounded-full font-semibold">
+                    <div className="flex justify-center mb-6">
+                      <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-6 py-2 rounded-full font-mono text-sm uppercase tracking-wider">
                         <CheckCircleIcon className="h-5 w-5" />
-                        Biometric verified!
+                        Biometric Verified
                       </div>
                     </div>
                   </FadeIn>
@@ -255,13 +384,12 @@ export default function VotingPage() {
                     <button
                       onClick={handleVote}
                       disabled={!biometricVerified || hasVoted || votingEnded}
-                      className={`w-full py-2 rounded text-white font-semibold transition duration-200 ${
-                        biometricVerified && !hasVoted && !votingEnded
-                          ? "bg-green-600 hover:bg-green-700"
-                          : "bg-gray-400 cursor-not-allowed"
-                      }`}
+                      className={`w-full py-4 rounded-lg font-bold text-lg tracking-widest transition-all duration-300 ${biometricVerified && !hasVoted && !votingEnded
+                        ? "bg-accent hover:bg-red-600 text-white shadow-[0_0_20px_rgba(199,58,49,0.4)] hover:shadow-[0_0_40px_rgba(199,58,49,0.6)]"
+                        : "bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700"
+                        }`}
                     >
-                      🗳️ Cast Vote
+                      CONFIRM VOTE
                     </button>
                   </HoverScale>
                 </FadeIn>
@@ -270,21 +398,54 @@ export default function VotingPage() {
 
             {status && (
               <FadeIn>
-                <p
-                  className={`mt-6 text-sm text-center transition-all duration-300 ${
-                    status.startsWith("✅")
-                      ? "text-green-700 dark:text-green-300"
-                      : status.startsWith("❌")
-                        ? "text-red-600 dark:text-red-300"
-                        : "text-gray-600 dark:text-gray-300"
-                  }`}
-                >
+                <div className={`mt-8 p-4 rounded border text-center font-mono text-sm ${status.startsWith("✅")
+                  ? "bg-green-900/20 border-green-500/30 text-green-400"
+                  : status.startsWith("❌")
+                    ? "bg-red-900/20 border-red-500/30 text-red-400"
+                    : "bg-blue-900/20 border-blue-500/30 text-blue-400"
+                  }`}>
                   {status}
-                </p>
+                </div>
               </FadeIn>
             )}
           </div>
         </TiltCard>
+
+        {/* Audit Trail Section */}
+        <FadeIn delay={800}>
+          <div className="w-full max-w-4xl mt-12 border-t border-white/10 pt-8">
+            <h3 className="text-lg font-headline font-bold text-text dark:text-white mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              Vote Audit Trail
+            </h3>
+            <div className="bg-black/5 dark:bg-black/30 border border-black/10 dark:border-white/5 rounded-lg p-4 font-mono text-xs space-y-2 text-gray-500 max-h-60 overflow-y-auto">
+              <div className="flex justify-between border-b border-white/5 pb-2 mb-2 sticky top-0 bg-background z-10">
+                <span>BLOCK</span>
+                <span>EVENT</span>
+                <span>TX HASH</span>
+              </div>
+
+              {auditEvents.length === 0 ? (
+                <div className="text-center py-4 text-gray-600 italic">No events found on-chain yet.</div>
+              ) : (
+                auditEvents.map((event, i) => (
+                  <div key={i} className={`flex justify-between ${event.name === "VoteCast" ? "text-green-400" : "text-blue-400"}`}>
+                    <span>#{event.blockNumber}</span>
+                    <span>{event.name}</span>
+                    <a
+                      href={`https://www.oklink.com/amoy/tx/${event.hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="truncate w-24 hover:text-white underline decoration-dotted"
+                    >
+                      {event.hash.substring(0, 6)}...{event.hash.substring(event.hash.length - 4)}
+                    </a>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </FadeIn>
       </div>
     </PageWrapper>
   );
