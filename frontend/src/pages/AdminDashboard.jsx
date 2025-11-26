@@ -12,7 +12,6 @@ import {
   PlusIcon,
   ClockIcon,
   StopIcon,
-  UsersIcon,
   ChartBarIcon,
   ShieldCheckIcon,
   GlobeAltIcon

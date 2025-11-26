@@ -21,7 +21,6 @@ export default function VotingPage() {
   const [timeLeft, setTimeLeft] = useState("");
   const [biometricVerified, setBiometricVerified] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [voteCounts, setVoteCounts] = useState({});
   const [credentialIdHash, setCredentialIdHash] = useState("");
   const [auditEvents, setAuditEvents] = useState([]);
 
@@ -46,14 +45,11 @@ export default function VotingPage() {
       // Load candidates and votes
       const count = Number(await contract.candidatesCount());
       const list = [];
-      const counts = {};
       for (let i = 1; i <= count; i++) {
         const c = await contract.candidates(i);
         list.push({ id: Number(c.id), name: c.name });
-        counts[c.id] = Number(c.voteCount);
       }
       setCandidates(list);
-      setVoteCounts(counts);
 
       // Check voter status
       const voter = await contract.voters(user);
