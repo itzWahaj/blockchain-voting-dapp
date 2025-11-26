@@ -6,13 +6,17 @@
     <script>
       // Grab the path the user tried to visit...
       const path = window.location.pathname;
-      // ...then bounce back to index.html, tucking the original path into a query param
-      const redirectUrl = `${window.location.origin}/?redirect=${encodeURIComponent(path)}`;
+      // Account for the basename in React Router
+      const basename = '/blockchain-voting-dapp';
+      // If the path doesn't start with basename, add it
+      const normalizedPath = path.startsWith(basename) ? path : basename + path;
+      // Redirect to index.html with the original path as a query param
+      const redirectUrl = `${window.location.origin}${basename}/?redirect=${encodeURIComponent(normalizedPath)}`;
       window.location.replace(redirectUrl);
     </script>
     <noscript>
       <!-- Fallback if JS is off -->
-      <meta http-equiv="refresh" content="0;url=/" />
+      <meta http-equiv="refresh" content="0;url=/blockchain-voting-dapp/" />
     </noscript>
   </head>
   <body></body>
