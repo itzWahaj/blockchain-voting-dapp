@@ -51,5 +51,3 @@ A secure, transparent, and decentralized voting application built on the Polygon
 **Deployment:**
 - GitHub Pages (Frontend)
 - Polygon Amoy Testnet (Smart Contracts)
-
-### Project Structure
