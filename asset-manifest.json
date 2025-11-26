@@ -1,21 +1,21 @@
 {
   "files": {
-    "main.css": "/blockchain-voting-dapp/static/css/main.f379ac3c.css",
-    "main.js": "/blockchain-voting-dapp/static/js/main.758e77e6.js",
+    "main.css": "/blockchain-voting-dapp/static/css/main.b8f06d85.css",
+    "main.js": "/blockchain-voting-dapp/static/js/main.63d2cb4d.js",
     "static/js/781.e2551f18.chunk.js": "/blockchain-voting-dapp/static/js/781.e2551f18.chunk.js",
     "static/js/549.1657ac9c.chunk.js": "/blockchain-voting-dapp/static/js/549.1657ac9c.chunk.js",
     "static/js/984.53d018a6.chunk.js": "/blockchain-voting-dapp/static/js/984.53d018a6.chunk.js",
     "static/js/453.8ab44547.chunk.js": "/blockchain-voting-dapp/static/js/453.8ab44547.chunk.js",
     "index.html": "/blockchain-voting-dapp/index.html",
-    "main.f379ac3c.css.map": "/blockchain-voting-dapp/static/css/main.f379ac3c.css.map",
-    "main.758e77e6.js.map": "/blockchain-voting-dapp/static/js/main.758e77e6.js.map",
+    "main.b8f06d85.css.map": "/blockchain-voting-dapp/static/css/main.b8f06d85.css.map",
+    "main.63d2cb4d.js.map": "/blockchain-voting-dapp/static/js/main.63d2cb4d.js.map",
     "781.e2551f18.chunk.js.map": "/blockchain-voting-dapp/static/js/781.e2551f18.chunk.js.map",
     "549.1657ac9c.chunk.js.map": "/blockchain-voting-dapp/static/js/549.1657ac9c.chunk.js.map",
     "984.53d018a6.chunk.js.map": "/blockchain-voting-dapp/static/js/984.53d018a6.chunk.js.map",
     "453.8ab44547.chunk.js.map": "/blockchain-voting-dapp/static/js/453.8ab44547.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f379ac3c.css",
-    "static/js/main.758e77e6.js"
+    "static/css/main.b8f06d85.css",
+    "static/js/main.63d2cb4d.js"
   ]
 }
