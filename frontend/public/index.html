@@ -4,8 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Favicon -->
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- Favicon - Circular SVG (perfect circle with 50% border radius effect) -->
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg?v=5" />
+    <!-- Force SVG for all modern browsers -->
+    <link rel="shortcut icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg?v=5" />
+    <!-- ICO fallback only for very old browsers -->
+    <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico?v=5" />
+    
+    <!-- Circular mask icon for Safari (renders as circle) -->
+    <link rel="mask-icon" href="%PUBLIC_URL%/favicon.svg?v=5" color="#FFD700" />
 
     <!-- Theme Colors -->
     <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)" />
@@ -16,11 +23,11 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <!-- SEO + Accessibility -->
-    <meta name="description" content="Polygon Voting DApp with WebAuthn & Polygon ID" />
-    <meta name="keywords" content="Polygon, Voting, Blockchain, WebAuthn, zk, ID, React" />
+    <meta name="description" content="BlockVote – Decentralized Election System with WebAuthn & Blockchain" />
+    <meta name="keywords" content="BlockVote, Voting, Blockchain, Decentralized, Election, WebAuthn, React" />
     <meta name="author" content="Your Project Team" />
 
-    <title>Polygon Voting DApp</title>
+    <title>BlockVote – Decentralized Election System</title>
   </head>
   <body class="bg-white dark:bg-gray-900 transition-colors duration-500">
     <noscript>You need to enable JavaScript to run this app.</noscript>
