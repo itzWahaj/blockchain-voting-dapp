@@ -9,8 +9,11 @@ const { execSync } = require("child_process");
 async function main() {
   console.log(chalk.cyan("🔧 Compiling and deploying Voting contract..."));
 
+  const [deployer] = await hre.ethers.getSigners();
+  console.log(chalk.gray(`Deploying with account: ${deployer.address}`));
+
   const Voting = await hre.ethers.getContractFactory("Voting");
-  const voting = await Voting.deploy();
+  const voting = await Voting.deploy(deployer.address);
   await voting.waitForDeployment();
 
   const address = voting.target;
